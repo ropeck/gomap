@@ -17,7 +17,7 @@ func Apikey(r *http.Request) string {
 	_, _ = q.GetAll(ctx, &res)
 
 	var c string
-	for i, v := range res {
+	for _, v := range res {
 	  if v.Name == "APIKEY" {
 	    c = v.Value
 	  }
