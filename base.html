@@ -21,6 +21,11 @@ just some stuff
       text-align: right;
       }
       .im { background-color: grey; }
+      .logo {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+      }
     </style>
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
@@ -124,7 +129,7 @@ just some stuff
       <br>
       {{ template "content" . }}
       <br>
-      <div>
+      <div class=logo>
         <img src="https://code.google.com/appengine/images/appengine-noborder-120x30.gif" align="right" alt="[app engine logo]">
       </div>
     </div>
