@@ -14,5 +14,5 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-  http.HandleFunc("/hello", hello)
+  http.HandleFunc("/", hello)
 }
