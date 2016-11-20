@@ -3,6 +3,7 @@ import (
 	"net/http"
         "appengine"
         "appengine/datastore"
+	"googlemaps.github.io/maps"
 )
 
 type Config struct {
@@ -24,3 +25,20 @@ func Apikey(r *http.Request) string {
         }
 	return c
 }
+
+type Directions struct {
+	Origin string
+  Client *maps.Client
+}
+
+func NewDirections(r *http.Request) *Directions {
+  var d = new(Directions)
+  c, _ := maps.NewClient(maps.WithAPIKey(Apikey(r)))
+  d.Client = c
+  return d
+}
+
+func (d *Directions) Directions() {
+  d.Origin = "something"
+}
+
