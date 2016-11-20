@@ -1,7 +1,7 @@
 package gomap
 
 import (
-	"directions"
+	"github.com/ropeck/directions"
 	"net/http"
 	"html/template"
 )
