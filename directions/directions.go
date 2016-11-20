@@ -1,5 +1,6 @@
 package directions
 import (
+	"os"
 	"net/http"
         "appengine"
         "appengine/datastore"
@@ -17,7 +18,7 @@ func Apikey(r *http.Request) string {
 	q := datastore.NewQuery("Config")
 	_, _ = q.GetAll(ctx, &res)
 
-	var c string
+	c := os.Getenv("APIKEY")
 	for _, v := range res {
 	  if v.Name == "APIKEY" {
 	    c = v.Value
@@ -29,12 +30,14 @@ func Apikey(r *http.Request) string {
 type Directions struct {
 	Origin string
   Client *maps.Client
+  Apikey string
 }
 
 func NewDirections(r *http.Request) *Directions {
   var d = new(Directions)
   c, _ := maps.NewClient(maps.WithAPIKey(Apikey(r)))
   d.Client = c
+  d.Apikey = Apikey(r)
   return d
 }
 
