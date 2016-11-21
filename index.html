@@ -7,13 +7,19 @@
 </style>
 
 <h2>Driving Traffic Info</h2>
-
+{{ .Dir.Summary }}
+{{ .Leg.Distance.HumanReadable }}
 <h2>Details by Steps</h2>
 <table>
-  <tr><td>Directions</td><td>Dist</td><td>Time</td></tr>
+  <tr><th>Dist</th><th>Time</th><th>Directions</th></tr>
+{{ range $k, $v := .Steps }}
+  <tr>
+<td>{{ $v.Distance.HumanReadable }}</td><td>{{ $v.Duration }}</td>
+<td>{{ $v.HTMLInstructions }}</td>
+</tr>
+
+{{ end }}
 </table>
-<pre>
-{{ .Resp }}
-</pre>
+
 {{ end }}
 
