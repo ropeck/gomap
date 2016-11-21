@@ -1,0 +1,40 @@
+{{ define "head" }}
+<script>
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawpage);
+
+      function drawpage() {
+        var date = new Date().getTime();
+        var jsonData = $.ajax({
+            url: "/arrivedata/" + date,
+            dataType: "json",
+            async: false
+            }).responseText;
+
+        var plotarea = document.getElementById('plotarea');
+        var data = new google.visualization.arrayToDataTable(JSON.parse(jsonData
+));
+        var ticks = [];
+        for (var i=0; i < 24; i = i + 1) {
+                        ticks.push({v: i*60, f: i + ":00"})
+                      };
+        var options = {
+                        hAxis: {
+                          ticks: ticks
+                        },
+                        vAxis: {
+                          ticks: ticks
+                        }
+        };
+
+        var chart = new google.visualization.LineChart(plotarea);
+        chart.draw(data, options);
+      };
+</script>
+{{ end }}
+
+{{ define "content" }}
+  <div class="im" id="plotarea" style="width: 600px; height: 400px;"></div>
+{{ end }}
+
+
