@@ -1,6 +1,9 @@
 runtime: go
 api_version: go1
 
+env_variables:
+  APIKEY: 'AIzaSyAyW7PJpp8Njyva0A_-vgn65spJT_4Eceg'
+
 handlers:
 - url: /.*
   script: _go_app

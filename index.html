@@ -14,8 +14,8 @@
   <tr><th>Dist</th><th>Time</th><th>Directions</th></tr>
 {{ range $k, $v := .Steps }}
   <tr>
-<td>{{ $v.Distance.HumanReadable }}</td><td>{{ $v.Duration }}</td>
-<td>{{ $v.HTMLInstructions }}</td>
+<td>{{ $v.Dist }}</td><td>{{ $v.Duration }}</td>
+<td>{{ $v.Directions }}</td>
 </tr>
 
 {{ end }}
