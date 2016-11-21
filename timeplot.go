@@ -1,4 +1,4 @@
-package gomap
+package main
 
 import (
 	"github.com/ropeck/directions"
