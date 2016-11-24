@@ -6,17 +6,21 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kr/pretty"
 	"github.com/ropeck/directions"
 )
 
-func drawday(td time.Time) [][]string {
-	return drawday_base(td, false, false)
+func drawday(td time.Time, r *http.Request) [][]string {
+	return drawday_base(td, r, false, false)
 }
 
-func drawday_base(td time.Time, reverse bool, cache bool) [][]string {
-	data := [][]string{{"Leave", "Expected", "Delay"}}
-	data = append(data, []string{"0", "1", "2"})
-	return data
+func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [][]string {
+	d := directions.NewDirections(r)
+	d.Directions()
+	//data := [][]string{{"Leave", "Expected", "Delay"}}
+	//data = append(data, []string{"0", "1", "2"})
+	data := pretty.Sprint(d)
+	return [][]string{{string(data)}}
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
@@ -36,11 +40,9 @@ func arrive(w http.ResponseWriter, r *http.Request) {
 func arrivedata(w http.ResponseWriter, r *http.Request) {
 	d := directions.NewDirections(r)
 	d.Directions()
-	td := time.Now()
-	data := drawday(td)
-	// for h in drawday(td):
-	//   data.append( stuff from h )
-	b, _ := json.Marshal(data)
+	//td := time.Now()
+	//data := drawday(td, r)
+	b, _ := json.Marshal(d.Resp)
 	w.Write(b)
 }
 
