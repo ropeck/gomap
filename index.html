@@ -9,9 +9,9 @@
 <h2>Driving Traffic Info</h2>
 {{ .Dir.Summary }}
 <br>
-{{ .Leg.Distance.HumanReadable }}
+Distance {{ .Distance.HumanReadable }}
 <br>
-{{ .Leg.Duration }} {{ .Leg.DurationInTraffic }}
+Duration {{ .Duration }}, in traffic {{ .DurationInTraffic }}
 <br>
 Start: {{ .Leg.StartAddress }}
 <br>
