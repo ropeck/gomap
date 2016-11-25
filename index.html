@@ -11,8 +11,11 @@
 <br>
 {{ .Leg.Distance.HumanReadable }}
 <br>
-{{ .Leg.Duration }}
-{{ . }}
+{{ .Leg.Duration }} {{ .Leg.DurationInTraffic }}
+<br>
+Start: {{ .Leg.StartAddress }}
+<br>
+End: {{ .Leg.EndAddress }}
 <h2>Details by Steps</h2>
 <table>
   <tr><th>Dist</th><th>Time</th><th>Directions</th></tr>
