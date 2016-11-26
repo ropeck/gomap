@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 	"strconv"
-	"encoding/json"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/urlfetch"
 	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/memcache"
 	"googlemaps.github.io/maps"
 )
 
@@ -117,13 +117,25 @@ func (d *Directions) Directions(td *time.Time) {
 	}
 	ctx := appengine.NewContext(d.r)
 
-	resp, _, err := d.Client.Directions(appengine.NewContext(d.r), r)
-	s, _ := json.MarshalIndent(&resp,"","  ")
-	log.Infof(ctx, string(s))
-	if err != nil {
-		log.Infof(ctx, err.Error())
+	mkey := strconv.FormatInt(td.Unix(), 10)
+	log.Infof(ctx, "memcache: " + mkey)
+	if item, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
+		log.Infof(ctx, "item not in the cache")
+		resp, _, err := d.Client.Directions(appengine.NewContext(d.r), r)
+		d.Dir = &resp[0]
+
+ 		err = memcache.JSON.Set(ctx, &memcache.Item{Key: mkey, Object: d.Dir})
+		if err != nil {
+			log.Infof(ctx, err.Error())
+		}
+	} else if err != nil {
+		log.Errorf(ctx, "error getting item: %v", err)
+	} else {
+		log.Infof(ctx, "the lyric is %q", item.Value)
 	}
-	d.Dir = &resp[0]
+
+//	s, _ := json.MarshalIndent(&resp,"","  ")
+//	log.Infof(ctx, string(s))
 	for _, v := range d.Dir.Legs[0].Steps {
 		d.Steps = append(d.Steps, NewStep(v))
 	}
@@ -131,5 +143,5 @@ func (d *Directions) Directions(td *time.Time) {
 	d.Distance = d.Leg.Distance
 	d.Duration = d.Leg.Duration
 	d.DurationInTraffic = d.Leg.DurationInTraffic
-	d.Resp = string(s)
+//	d.Resp = string(s)
 }
