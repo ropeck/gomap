@@ -1,6 +1,6 @@
 {{ define "content" }}
 <style type="text/css">
-.slow {
+.red {
     font-weight: bold;
     color: red;
 }
@@ -18,11 +18,12 @@ Start: {{ .Leg.StartAddress }}
 End: {{ .Leg.EndAddress }}
 <h2>Details by Steps</h2>
 <table>
-  <tr><th>Dist</th><th>Time</th><th>Directions</th></tr>
+  <tr><th>Directions</th><th>Dist</th><th>Time</th></tr>
 {{ range $k, $v := .Steps }}
   <tr>
-<td>{{ $v.Dist }}</td><td>{{ $v.Duration }}</td>
 <td>{{ $v.Directions }}</td>
+<td class={{ $v.Color }}>{{ $v.Distance }}</td>
+<td class={{ $v.Color }}>{{ $v.Duration }}</td>
 </tr>
 
 {{ end }}
