@@ -82,7 +82,12 @@ func NewStep(v *maps.Step) *Step {
 	return &st
 }
 
-func (d *Directions) Directions() {
+func (d *Directions) DirectionsNow() {
+	t := time.Now()
+	d.Directions(&t)
+}
+
+func (d *Directions) Directions(td *time.Time) {
 	// really not sure where the cookie/session stuff fits best.
 	// put it here for now
 	// two cookies for the start and dest total.
@@ -108,7 +113,7 @@ func (d *Directions) Directions() {
 		Mode:        maps.TravelModeDriving,
 		Origin:      origin,
 		Destination: destination,
-		DepartureTime:  strconv.FormatInt(time.Now().Unix(), 10),
+		DepartureTime:  strconv.FormatInt(td.Unix(), 10),
 	}
 	ctx := appengine.NewContext(d.r)
 
