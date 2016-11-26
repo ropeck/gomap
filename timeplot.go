@@ -23,23 +23,28 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [][]s
 	return [][]string{{string(data)}}
 }
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	t, _ := template.ParseFiles("base.html", "index.html")
+func NewDirections(w http.ResponseWriter, r *http.Request) (*directions.Directions) {
 	d := directions.NewDirections(r)
 	d.Directions()
+	http.SetCookie(w, d.Ocookie)
+	http.SetCookie(w, d.Dcookie)
+	return d
+}
+
+func hello(w http.ResponseWriter, r *http.Request) {
+        d := NewDirections(w, r)
+	t, _ := template.ParseFiles("base.html", "index.html")
 	t.ExecuteTemplate(w, "layout", d)
 }
 
 func arrive(w http.ResponseWriter, r *http.Request) {
+        d := NewDirections(w, r)
 	t, _ := template.ParseFiles("base.html", "arrive.html")
-	d := directions.NewDirections(r)
-	d.Directions()
 	t.ExecuteTemplate(w, "layout", d)
 }
 
 func arrivedata(w http.ResponseWriter, r *http.Request) {
-	d := directions.NewDirections(r)
-	d.Directions()
+        d := NewDirections(w, r)
 	//td := time.Now()
 	//data := drawday(td, r)
 	b, _ := json.Marshal(d.Resp)
