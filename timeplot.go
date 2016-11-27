@@ -5,26 +5,31 @@ import (
 	"html/template"
 	"net/http"
 	"time"
-	"fmt"
+	"strconv"
+	"github.com/husobee/vestigo"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
-func drawday(td time.Time, r *http.Request) [][]string {
+func drawday(td time.Time, r *http.Request) []interface{} {
 	return drawday_base(td, r, false, false)
 }
 
-func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [][]string {
+func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) []interface{} {
 	d := NewDirections(r)
-	data := [][]string{{"Leave", "Expected", "Delay"}}
+	var data []interface{}
+	data = append(data, []string{"Time", "Leave", "Expected", "Delay"})
 	//data = append(data, []string{"0", "1", "2"})
 	// loop over hours of the day, collecting the directions result for
 	// for each hour
-	y,m,day := td.Add(time.Hour*24).Date()
-	t := time.Date(y,m,day,0,0,0,0,td.Location())
+	ctx := appengine.NewContext(d.r)
+	t := td.Truncate(24*time.Hour)
 	for i := 0; i < 24; i++ {
+		log.Infof(ctx, t.String())
 		d.Directions(&t)
-		data = append(data, []string{t.String(),
-			fmt.Sprintf("%v",d.Duration.Seconds()),
-			fmt.Sprintf("%v",d.DurationInTraffic.Seconds())})
+		data = append(data,[]interface{}{i*60, i*60,
+			int(d.Duration.Seconds())/60+i*60,
+			int(d.DurationInTraffic.Seconds())/60+i*60,})
 		t = t.Add(time.Hour)
 	}
 	return data
@@ -51,14 +56,18 @@ func arrive(w http.ResponseWriter, r *http.Request) {
 }
 
 func arrivedata(w http.ResponseWriter, r *http.Request) {
-	//td := time.Now()
-	data := drawday(time.Now(), r)
+	tdarg := vestigo.Param(r, "date")
+	i, _ := strconv.ParseInt(tdarg, 10, 64)
+	data := drawday(time.Unix(i/1000, 0), r)
 	b, _ := json.Marshal(data)
 	w.Write(b)
 }
 
 func init() {
-	http.HandleFunc("/arrivedata", arrivedata)
-	http.HandleFunc("/arrive", arrive)
-	http.HandleFunc("/", hello)
+	r := vestigo.NewRouter()
+	r.Get("/arrivedata/:date", arrivedata)
+	r.Get("/arrivedata", arrivedata)
+	r.Get("/arrive", arrive)
+	r.Get("/", hello)
+	http.Handle("/",r)
 }

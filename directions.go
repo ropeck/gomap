@@ -117,7 +117,9 @@ func (d *Directions) Directions(td *time.Time) {
 	}
 	ctx := appengine.NewContext(d.r)
 
-	mkey := strconv.FormatInt(td.Unix()/(60*30), 10)
+	mtd := td.Unix()/(60*30) * (60*30)
+	mkey := time.Unix(mtd,0).String()
+	log.Infof(ctx, "memcache: " + td.String())
 	log.Infof(ctx, "memcache: " + mkey)
 	if _, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
 		log.Infof(ctx, "item not in the cache")
