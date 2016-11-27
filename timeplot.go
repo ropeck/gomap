@@ -7,8 +7,6 @@ import (
 	"time"
 	"strconv"
 	"github.com/husobee/vestigo"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 )
 
 func drawday(td time.Time, r *http.Request) []interface{} {
@@ -19,13 +17,8 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) []int
 	d := NewDirections(r)
 	var data []interface{}
 	data = append(data, []string{"Time", "Leave", "Expected", "Delay"})
-	//data = append(data, []string{"0", "1", "2"})
-	// loop over hours of the day, collecting the directions result for
-	// for each hour
-	ctx := appengine.NewContext(d.r)
 	t := td.Truncate(24*time.Hour)
 	for i := 0; i < 24; i++ {
-		log.Infof(ctx, t.String())
 		d.Directions(&t)
 		data = append(data,[]interface{}{i*60, i*60,
 			int(d.Duration.Seconds())/60+i*60,
