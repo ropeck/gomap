@@ -1,0 +1,42 @@
+{{ define "head" }}
+<script>
+      google.charts.load('current', {'packages':['line']});
+      google.charts.setOnLoadCallback(drawmany);
+
+      function drawChart(date) {
+
+        var jsonData = $.ajax({
+            url: "/traveldata/" + date,
+            dataType: "json",
+            async: false
+            }).responseText;
+
+        var data = new google.visualization.arrayToDataTable(JSON.parse(jsonData));
+
+        var options = {
+        };
+
+        var chart = new google.charts.Line(document.getElementById(date));
+        chart.draw(data, options);
+      };
+      function drawpage(date) {
+        var div = document.createElement('div');
+        div.id = date;
+        div.class = "im";
+        var plotarea = document.getElementById('plotarea');
+        plotarea.append(div)
+        drawChart(date);
+      };
+
+      function drawmany() {
+        var date = new Date().getTime();
+        drawpage(date);
+        document.getElementById('origin').addEventListener('change', drawmany);
+        document.getElementById('destination').addEventListener('change', drawmany);
+      };
+</script>
+{{ end }}
+{{ define "content" }}
+    <div class="im" id="plotarea" style="width: 500px"></div>
+{{ end }}
+    
