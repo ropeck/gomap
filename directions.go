@@ -120,7 +120,7 @@ func (d *Directions) Directions(td *time.Time) {
 	// cache by intervals for better hit rate
 	tdd := td.Truncate(30*time.Minute)
 	if tdd.Unix() < time.Now().Unix() {
-		tdd = tdd.Add(time.Minute*30)
+		tdd = tdd.Add(time.Hour*24*7) // look at next week for hints on past
 	}
 	mkey := tdd.String()+":"+origin+destination
 	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)

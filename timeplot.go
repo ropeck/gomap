@@ -28,6 +28,36 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) []int
 	return data
 }
 
+// func drawdaylines(td time.Time) []interface{} {
+//   midnight = td.replace(td.year,td.month,td.day,8,0,0,0)
+//   memkey = 'lines:'+str(midnight)
+
+//   daylist = []
+//   data = {}
+//   td = midnight
+//   for i in range(7):
+//     day = td.strftime("%a")
+//     data[day] = drawday(td, reverse=True, cache=False)
+//     daylist.append(day)
+//     td = td + timedelta(days=1)
+
+//   ret = [['Time'] + daylist]
+//   try:
+//     r = 0
+//     for m in drawday(td)[1:]:
+//       r = r + 1
+//       row = [m[0]]
+//       dn = 1
+//       for day in daylist:
+//         row.append(data[day][r][1])
+//         dn = dn + 1
+//         ret.append(row)
+//   except runtime.DeadlineExceededError:
+//     print "error: deadline exceeded in lookups"
+//     # the lookups timed out, so the result is probably incomplete
+//   return ret
+// }
+
 func LocalNewDirections(w http.ResponseWriter, r *http.Request) (*Directions) {
 	d := NewDirections(r)
 	d.DirectionsNow()
