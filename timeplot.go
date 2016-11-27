@@ -17,7 +17,7 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) []int
 	d := NewDirections(r)
 	var data []interface{}
 	data = append(data, []string{"Time", "Leave", "Expected", "Delay"})
-	t := td.Truncate(24*time.Hour)
+	t := td.Truncate(24*time.Hour).Add(24*time.Hour)
 	for i := 0; i < 24; i++ {
 		d.Directions(&t)
 		data = append(data,[]interface{}{i*60, i*60,
