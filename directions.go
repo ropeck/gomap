@@ -118,8 +118,12 @@ func (d *Directions) Directions(td *time.Time) {
 	ctx := appengine.NewContext(d.r)
 
 	// cache by intervals for better hit rate
-	mkey := td.Truncate(30*time.Minute).String()+":"+origin+destination
-
+	tdd := td.Truncate(30*time.Minute)
+	if tdd.Unix() < time.Now().Unix() {
+		tdd = tdd.Add(time.Minute*30)
+	}
+	mkey := tdd.String()+":"+origin+destination
+	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)
 	log.Infof(ctx, "memcache: " + mkey + " " + td.String())
 	if _, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
 		log.Infof(ctx, "item not in the cache")
