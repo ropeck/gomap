@@ -4,14 +4,14 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-	"time"
 	"strconv"
+	"time"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/urlfetch"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/memcache"
+	"google.golang.org/appengine/urlfetch"
 	"googlemaps.github.io/maps"
 )
 
@@ -21,26 +21,26 @@ type Config struct {
 }
 
 type Directions struct {
-	Origin string
-	Client *maps.Client
-	Apikey string
-	r      *http.Request
-	Resp   string
-	Leg    *maps.Leg
-	Dir    *maps.Route
-	Steps  []*Step
-	Duration   time.Duration
-	DurationInTraffic   time.Duration
-	Distance maps.Distance
-	Dcookie	*http.Cookie
-	Ocookie *http.Cookie
+	Origin            string
+	Client            *maps.Client
+	Apikey            string
+	r                 *http.Request
+	Resp              string
+	Leg               *maps.Leg
+	Dir               *maps.Route
+	Steps             []*Step
+	Duration          time.Duration
+	DurationInTraffic time.Duration
+	Distance          maps.Distance
+	Dcookie           *http.Cookie
+	Ocookie           *http.Cookie
 }
 
 type Step struct {
-	Distance	string
+	Distance   string
 	Duration   time.Duration
 	Directions template.HTML
-	Color	string
+	Color      string
 }
 
 func (d *Directions) GetApikey() string {
@@ -75,8 +75,8 @@ func NewDirections(r *http.Request) *Directions {
 func NewStep(v *maps.Step) *Step {
 	st := Step{Distance: v.Distance.HumanReadable, Duration: v.Duration,
 		Directions: template.HTML(v.HTMLInstructions),
-		Color: "none"}
-	if (st.Duration/time.Second > 5*60) {
+		Color:      "none"}
+	if st.Duration/time.Second > 5*60 {
 		st.Color = "red"
 	}
 	return &st
@@ -99,32 +99,33 @@ func (d *Directions) Directions(td *time.Time) {
 	if err == nil && cookie.Value != "" {
 		origin = cookie.Value
 	} else {
-		cookie=  &http.Cookie{Name: "origin", Value: origin}
- 	}
+		cookie = &http.Cookie{Name: "origin", Value: origin}
+	}
 	d.Ocookie = cookie
 	cookie, err = d.r.Cookie("destination")
 	if err == nil && cookie.Value != "" {
 		destination = cookie.Value
 	}
-		cookie=  &http.Cookie{Name: "destination", Value: destination}
+	cookie = &http.Cookie{Name: "destination", Value: destination}
 	d.Dcookie = cookie
 
 	r := &maps.DirectionsRequest{
-		Mode:        maps.TravelModeDriving,
-		Origin:      origin,
-		Destination: destination,
-		DepartureTime:  strconv.FormatInt(td.Truncate(30*time.Minute).Unix(), 10),
+		Mode:          maps.TravelModeDriving,
+		Origin:        origin,
+		Destination:   destination,
+		DepartureTime: strconv.FormatInt(td.Truncate(30*time.Minute).Unix(), 10),
 	}
 	ctx := appengine.NewContext(d.r)
 
 	// cache by intervals for better hit rate
-	tdd := td.Truncate(30*time.Minute)
+	tdd := td.Truncate(30 * time.Minute)
 	if tdd.Unix() < time.Now().Unix() {
-		tdd = tdd.Add(time.Hour*24*7) // look at next week for hints on past
+		tdd = tdd.Add(time.Hour * 24 * 7) // look at next week for hints on past
 	}
-	mkey := tdd.String()+":"+origin+destination
+	mkey := tdd.String() + ":" + origin + destination
 	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)
-	log.Infof(ctx, "memcache: " + mkey + " " + td.String())
+	log.Infof(ctx, "memcache: "+mkey+" "+td.String())
+
 	if _, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
 		log.Infof(ctx, "item not in the cache")
 
@@ -134,7 +135,7 @@ func (d *Directions) Directions(td *time.Time) {
 		}
 		d.Dir = &resp[0]
 
- 		err = memcache.JSON.Set(ctx, &memcache.Item{Key: mkey, Object: d.Dir})
+		err = memcache.JSON.Set(ctx, &memcache.Item{Key: mkey, Object: d.Dir})
 		log.Infof(ctx, "cache update")
 		if err != nil {
 			log.Infof(ctx, err.Error())
