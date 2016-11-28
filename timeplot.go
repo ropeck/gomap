@@ -6,22 +6,25 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"fmt"
 
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"github.com/husobee/vestigo"
 )
 
-func drawday(td time.Time, r *http.Request) []interface{} {
+func drawday(td time.Time, r *http.Request) [][]int {
 	return drawday_base(td, r, false, false)
 }
 
-func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) []interface{} {
+func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [][]int {
 	d := NewDirections(r)
-	var data []interface{}
-	data = append(data, []string{"Time", "Leave", "Expected", "Delay"})
+	var data [][]int
+//	data = append(data, []string{"Time", "Leave", "Expected", "Delay"})
 	t := td.Truncate(24 * time.Hour).Add(24 * time.Hour)
 	for i := 0; i < 24; i++ {
 		d.Directions(&t)
-		data = append(data, []interface{}{i * 60, i * 60,
+		data = append(data, []int{i * 60, i * 60,
 			int(d.Duration.Seconds())/60 + i*60,
 			int(d.DurationInTraffic.Seconds())/60 + i*60})
 		t = t.Add(time.Hour)
@@ -32,24 +35,31 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) []int
 func drawdaylines(td time.Time, r *http.Request) []interface{} {
 	midnight := td.Truncate(time.Hour * 24)
 	daylist := []string{"Time"}
-	data := make(map[time.Weekday]([]interface{}))
+	data := make(map[time.Weekday]([][]int))
 	td = midnight
 	for i := 0; i < 7; i++ {
 		day := td.Weekday()
-		data[day] = drawday(td, r)
+		data[day] = drawday(td, r)  // this is where to pick out the data
+		
 		daylist = append(daylist, day.String())
 		td = td.Add(time.Hour * 24)
 	}
 	ret := make([]interface{}, 25)
 	ret = append(ret, daylist)
 
+	ctx := appengine.NewContext(r)
+	
 	for h := 0; h < 24; h++ {
 		row := make([]int, 8)
+
 		for w := 0; w < 7; w++ {
+			log.Infof(ctx, fmt.Sprintf("drawdaylines %v", time.Weekday(w)))
+			log.Infof(ctx, fmt.Sprintf("drawdaylines %v", data[time.Weekday(w)][h+1]))
 			stat := make([]int, 4)
 			stat[0] = h
-			for i, v := range data[time.Weekday(w)][h+1].([]int) {
-				stat[i] = v
+			for i, v := range data[time.Weekday(w)][h] {
+				log.Infof(ctx, fmt.Sprintf(" %v", v))
+				stat[i] = 1
 			}
 			row[w+1] = stat[3]
 		}
