@@ -13,6 +13,8 @@ import (
 	"github.com/husobee/vestigo"
 )
 
+// use mutation function on the directions to pass options for cache and reverse
+
 func drawday(td time.Time, r *http.Request) [][]int {
 	return drawday_base(td, r, false, false)
 }
@@ -103,9 +105,15 @@ func traveldata(w http.ResponseWriter, r *http.Request) {
 }
 
 func arrivedata(w http.ResponseWriter, r *http.Request) {
+	var data []interface{}
+	data = append(data, []string{"Time", "Leave", "Expected", "Delay"})
+
 	tdarg := vestigo.Param(r, "date")
 	i, _ := strconv.ParseInt(tdarg, 10, 64)
-	data := drawday(time.Unix(i/1000, 0), r)
+
+	for _, v := range drawday(time.Unix(i/1000, 0), r) {
+		data = append(data, v)
+	}
 	b, _ := json.Marshal(data)
 	w.Write(b)
 }
