@@ -51,19 +51,14 @@ func drawdaylines(td time.Time, r *http.Request) []interface{} {
 
 	ctx := appengine.NewContext(r)
 	
-	for h := 0; h < 24; h++ {
+	for h := 0; h < 23; h++ {
 		row := make([]int, 8)
 
 		for w := 0; w < 7; w++ {
 			log.Infof(ctx, fmt.Sprintf("drawdaylines %v", time.Weekday(w)))
 			log.Infof(ctx, fmt.Sprintf("drawdaylines %v", data[time.Weekday(w)][h+1]))
-			stat := make([]int, 4)
-			stat[0] = h
-			for i, v := range data[time.Weekday(w)][h] {
-				log.Infof(ctx, fmt.Sprintf(" %v", v))
-				stat[i] = 1
-			}
-			row[w+1] = stat[3]
+			row[w] = data[time.Weekday(w)][h][2]
+			log.Infof(ctx, fmt.Sprintf(" %v", data[time.Weekday(w)]))
 		}
 		ret = append(ret, row)
 	}
