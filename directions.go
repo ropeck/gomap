@@ -64,7 +64,8 @@ func NewDirections(r *http.Request) *Directions {
 	d.Apikey = d.GetApikey()
 	ctx := appengine.NewContext(r)
 	uc := urlfetch.Client(ctx)
-	c, err := maps.NewClient(maps.WithAPIKey(d.Apikey), maps.WithHTTPClient(uc))
+	c, err := maps.NewClient(maps.WithAPIKey(d.Apikey),
+		maps.WithHTTPClient(uc))
 	d.Client = c
 	if err != nil {
 		d.Resp = err.Error()
@@ -110,32 +111,37 @@ func (d *Directions) Directions(td *time.Time) {
 	d.Dcookie = cookie
 
 	r := &maps.DirectionsRequest{
-		Mode:          maps.TravelModeDriving,
-		Origin:        origin,
-		Destination:   destination,
-		DepartureTime: strconv.FormatInt(td.Truncate(30*time.Minute).Unix(), 10),
+		Mode:        maps.TravelModeDriving,
+		Origin:      origin,
+		Destination: destination,
+		DepartureTime: strconv.FormatInt(
+			td.Truncate(30*time.Minute).Unix(), 10),
 	}
 	ctx := appengine.NewContext(d.r)
 
 	// cache by intervals for better hit rate
 	tdd := td.Truncate(30 * time.Minute)
 	if tdd.Unix() < time.Now().Unix() {
-		tdd = tdd.Add(time.Hour * 24 * 7) // look at next week for hints on past
+		// look at next week for hints on past
+		tdd = tdd.Add(time.Hour * 24 * 7)
 	}
 	mkey := tdd.String() + ":" + origin + destination
 	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)
 	log.Infof(ctx, "memcache: "+mkey+" "+td.String())
 
-	if _, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
+	if _, err := memcache.JSON.Get(ctx, mkey,
+		&d.Dir); err == memcache.ErrCacheMiss {
 		log.Infof(ctx, "item not in the cache")
 
-		resp, _, err := d.Client.Directions(appengine.NewContext(d.r), r)
+		resp, _, err := d.Client.Directions(appengine.NewContext(d.r),
+			r)
 		if err != nil {
 			log.Infof(ctx, err.Error())
 		}
 		d.Dir = &resp[0]
 
-		err = memcache.JSON.Set(ctx, &memcache.Item{Key: mkey, Object: d.Dir})
+		err = memcache.JSON.Set(ctx,
+			&memcache.Item{Key: mkey, Object: d.Dir})
 		log.Infof(ctx, "cache update")
 		if err != nil {
 			log.Infof(ctx, err.Error())
