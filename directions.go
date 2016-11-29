@@ -110,13 +110,6 @@ func (d *Directions) Directions(td *time.Time) {
 	cookie = &http.Cookie{Name: "destination", Value: destination}
 	d.Dcookie = cookie
 
-	r := &maps.DirectionsRequest{
-		Mode:        maps.TravelModeDriving,
-		Origin:      origin,
-		Destination: destination,
-		DepartureTime: strconv.FormatInt(
-			td.Truncate(30*time.Minute).Unix(), 10),
-	}
 	ctx := appengine.NewContext(d.r)
 
 	// cache by intervals for better hit rate
@@ -124,6 +117,14 @@ func (d *Directions) Directions(td *time.Time) {
 	if tdd.Unix() < time.Now().Unix() {
 		// look at next week for hints on past
 		tdd = tdd.Add(time.Hour * 24 * 7)
+	}
+	dtime := strconv.FormatInt(tdd.Unix(), 10)
+	log.Infof(ctx, "tdd %s %v", dtime, tdd)
+	r := &maps.DirectionsRequest{
+		Mode:          maps.TravelModeDriving,
+		Origin:        origin,
+		Destination:   destination,
+		DepartureTime: dtime,
 	}
 	mkey := tdd.String() + ":" + origin + destination
 	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)
@@ -136,7 +137,9 @@ func (d *Directions) Directions(td *time.Time) {
 		resp, _, err := d.Client.Directions(appengine.NewContext(d.r),
 			r)
 		if err != nil {
+			log.Infof(ctx, mkey)
 			log.Infof(ctx, err.Error())
+			return
 		}
 		d.Dir = &resp[0]
 

@@ -24,7 +24,8 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 
 	yy, mm, dd := td.In(time.Local).Date()
 	t := time.Date(yy, mm, dd, 0, 0, 0, 0, td.Location())
-	
+
+	t = td
 
 	ch := make(chan [4]int, 24)
 	for i := 0; i < 24; i++ {
