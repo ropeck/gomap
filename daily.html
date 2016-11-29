@@ -1,0 +1,53 @@
+{{ define "head" }}
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawmany);
+
+      function drawChart(date) {
+
+        var jsonData = $.ajax({
+            url: "/dailydata/" + date,
+            dataType: "json",
+            async: false
+            }).responseText;
+
+        var data = new google.visualization.arrayToDataTable(JSON.parse(jsonData));
+
+        var options = {
+          hAxis: { textPosition: 'none' },
+          vAxis: { viewWindow: { max: 60, min: 0} },
+          axes: {
+            x: {
+              0: { side: 'bottom', label: ""}
+            }
+          },
+          legend: { position: 'none' },
+        };
+
+        var chart = new google.charts.Bar(document.getElementById(date));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      };
+      function drawpage(date) {
+        var div = document.createElement('div');
+        div.id = date;
+        var plotarea = document.getElementById('plotarea');
+        plotarea.append(div)
+        drawChart(date);
+      };
+
+      function drawmany() {
+        var date = new Date().getTime();
+        for (i=0; i<7; i++) {
+          drawpage(date);
+          date += 86400000;
+        }
+      };
+
+    </script>
+{{ end }}
+
+
+{{ define "content" }}
+<div class="im" id="plotarea" style="width: 450px; height: 200px;"></div>
+{{ end }}

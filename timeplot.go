@@ -104,6 +104,35 @@ func arrive(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "layout", d)
 }
 
+func daily(w http.ResponseWriter, r *http.Request) {
+	d := LocalNewDirections(w, r)
+	t, _ := template.ParseFiles("base.html", "daily.html")
+	t.ExecuteTemplate(w, "layout", d)
+}
+
+func to_hms(t time.Time) string {
+	//	t = t.Truncate(time.Hour)
+	return fmt.Sprintf("%d:%.02d", t.Hour(), t.Minute())
+}
+
+func dailydata(w http.ResponseWriter, r *http.Request) {
+	var data []interface{}
+	data = append(data, []string{"Time", "Delay"})
+
+	tdarg := vestigo.Param(r, "date")
+	i, _ := strconv.ParseInt(tdarg, 10, 64)
+
+	st := time.Unix(i/1000, 0)
+	yy, mm, dd := st.In(time.Local).Date()
+	st = time.Date(yy, mm, dd, 0, 0, 0, 0, st.Location())
+	for _, v := range drawday(st, r) {
+		data = append(data, [2]interface{}{to_hms(st), v[3] - v[2]})
+		st = st.Add(time.Hour)
+	}
+	b, _ := json.Marshal(data)
+	w.Write(b)
+}
+
 func travel(w http.ResponseWriter, r *http.Request) {
 	d := LocalNewDirections(w, r)
 	t, _ := template.ParseFiles("base.html", "travel.html")
@@ -134,8 +163,9 @@ func arrivedata(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	r := vestigo.NewRouter()
+	r.Get("/dailydata/:date", dailydata)
+	r.Get("/daily", daily)
 	r.Get("/arrivedata/:date", arrivedata)
-	r.Get("/arrivedata", arrivedata)
 	r.Get("/arrive", arrive)
 	r.Get("/traveldata/:date", traveldata)
 	r.Get("/travel", travel)
