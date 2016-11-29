@@ -15,21 +15,35 @@ import (
 
 // use mutation function on the directions to pass options for cache and reverse
 
-func drawday(td time.Time, r *http.Request) [][]int {
+func drawday(td time.Time, r *http.Request) [24][4]int {
 	return drawday_base(td, r, false, false)
 }
 
-func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [][]int {
-	d := NewDirections(r)
-	var data [][]int
-	//	data = append(data, []string{"Time", "Leave", "Expected", "Delay"})
+func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][4]int {
+	data := [24][4]int{}
+
 	t := td.Truncate(24 * time.Hour).Add(24 * time.Hour)
+
+	ch := make(chan [4]int)
 	for i := 0; i < 24; i++ {
-		d.Directions(&t)
-		data = append(data, []int{i * 60, i * 60,
-			int(d.Duration.Seconds())/60 + i*60,
-			int(d.DurationInTraffic.Seconds())/60 + i*60})
-		t = t.Add(time.Hour)
+		t := t.Add(time.Hour)
+		go func(i int, t time.Time, ch chan [4]int) {
+			d := NewDirections(r)
+			d.Directions(&t)
+			a := [4]int{i * 60, i * 60,
+				int(d.Duration.Seconds())/60 + i*60,
+				int(d.DurationInTraffic.Seconds())/60 + i*60}
+			ch <- a
+		}(i, t, ch)
+	}
+
+	// read back all 24 hours and assign them to the slots
+	ctx := appengine.NewContext(r)
+	for i := 0; i < 24; i++ {
+		d := <-ch
+		h := d[0] / 60
+		log.Infof(ctx, fmt.Sprintf("hour %d %v", h, d))
+		data[h] = d
 	}
 	return data
 }
@@ -38,13 +52,11 @@ func drawdaylines(td time.Time, r *http.Request) []interface{} {
 	ctx := appengine.NewContext(r)
 	midnight := td.Truncate(time.Hour * 24)
 	daylist := []string{"Time"}
-	data := make(map[time.Weekday]([][]int))
+	data := make(map[time.Weekday]([24][4]int))
 	td = midnight
 	for i := 0; i < 7; i++ {
 		day := td.Weekday()
 		data[day] = drawday(td, r) // this is where to pick out the data
-		log.Infof(ctx, fmt.Sprintf("%v %v", td, data[day]))
-
 		daylist = append(daylist, day.String())
 		td = td.Add(time.Hour * 24)
 	}
@@ -64,6 +76,8 @@ func drawdaylines(td time.Time, r *http.Request) []interface{} {
 		row[0] = h
 		ret = append(ret, row)
 	}
+	log.Infof(ctx, fmt.Sprintf("travel %v", ret))
+
 	return ret
 }
 
