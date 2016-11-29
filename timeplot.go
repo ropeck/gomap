@@ -22,11 +22,12 @@ func drawday(td time.Time, r *http.Request) [24][4]int {
 func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][4]int {
 	data := [24][4]int{}
 
-	t := td.Truncate(24 * time.Hour).Add(24 * time.Hour)
+	yy, mm, dd := td.In(time.Local).Date()
+	t := time.Date(yy, mm, dd, 0, 0, 0, 0, td.Location())
+	
 
-	ch := make(chan [4]int)
+	ch := make(chan [4]int, 24)
 	for i := 0; i < 24; i++ {
-		t := t.Add(time.Hour)
 		go func(i int, t time.Time, ch chan [4]int) {
 			d := NewDirections(r)
 			d.Directions(&t)
@@ -35,6 +36,7 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 				int(d.DurationInTraffic.Seconds())/60 + i*60}
 			ch <- a
 		}(i, t, ch)
+		t = t.Add(time.Hour)
 	}
 
 	// read back all 24 hours and assign them to the slots
