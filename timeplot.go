@@ -161,8 +161,47 @@ func arrivedata(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+type WhenInfo struct {
+	Distance          string
+	Duration          string
+	DurationInTraffic string
+	Text              string
+	Apikey            string
+}
+
+func whentogo(w http.ResponseWriter, r *http.Request) {
+	wh := new(WhenInfo)
+
+	d := LocalNewDirections(w, r)
+	wh.Distance = d.Distance.HumanReadable
+	wh.Duration = d.Duration.String()
+	wh.DurationInTraffic = d.DurationInTraffic.String()
+	wh.Text = ""
+	wh.Apikey = d.Apikey
+	td := time.Now().Truncate(10 * time.Minute)
+	for h := 0; h < 24; h++ {
+		d.Directions(&td)
+		td = td.Add(time.Minute * 10)
+		delay := int((d.DurationInTraffic - d.Duration).Seconds() / 60)
+		ar := td.Add(d.DurationInTraffic)
+		wh.Text = wh.Text + fmt.Sprintf("%s %s (%d m %+d)\n",
+			to_hms(td), to_hms(ar),
+			int(d.DurationInTraffic.Seconds()/60), delay)
+	}
+	//    tz = td.replace(tzinfo=pytz.timezone("UTC")).astimezone(pytz.timezone("US/Pacific"))
+	//      print tz.strftime("%H:%M"),(tz+timedelta(minutes=gmaps.duration_in_traffic/60)).strftime("%H:%M"), gmaps.duration_in_traffic_text, gmaps.diffstr
+
+	//      # 44 miles normally 0:52
+	//      # now   17:00 1:12 (+19)
+	//      # 16:50 17:09 1:12 (+19)
+	//      # ...
+	t, _ := template.ParseFiles("base.html", "whentogo.html")
+	t.ExecuteTemplate(w, "layout", wh)
+}
+
 func init() {
 	r := vestigo.NewRouter()
+	r.Get("/whentogo", whentogo)
 	r.Get("/dailydata/:date", dailydata)
 	r.Get("/daily", daily)
 	r.Get("/arrivedata/:date", arrivedata)
