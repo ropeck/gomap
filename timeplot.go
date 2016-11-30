@@ -26,7 +26,6 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 	yy, mm, dd := td.In(l).Date()
 	t := time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 
-
 	ch := make(chan [4]int, 24)
 	for i := 0; i < 24; i++ {
 		go func(i int, t time.Time, ch chan [4]int) {
@@ -115,6 +114,13 @@ func to_hms(t time.Time) string {
 	return fmt.Sprintf("%d:%.02d", t.Hour(), t.Minute())
 }
 
+func previous_monday(t time.Time) time.Time {
+	l, _ := time.LoadLocation("US/Pacific")
+	wd := int(t.Weekday())
+	yy, mm, dd := t.Add(time.Hour * 24 * time.Duration(wd)).Date()
+	st := time.Date(yy, mm, dd, 0, 0, 0, 0, l)
+	return st
+}
 func dailydata(w http.ResponseWriter, r *http.Request) {
 	var data []interface{}
 	data = append(data, []string{"Time", "Delay"})
@@ -122,8 +128,9 @@ func dailydata(w http.ResponseWriter, r *http.Request) {
 	tdarg := vestigo.Param(r, "date")
 	i, _ := strconv.ParseInt(tdarg, 10, 64)
 
+	// adjust start time to Midnight on Monday
 	st := time.Unix(i/1000, 0)
-	yy, mm, dd := st.In(time.Local).Date()
+	yy, mm, dd := st.Date()
 	l, _ := time.LoadLocation("US/Pacific")
 	st = time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 	for _, v := range drawday(st, r) {

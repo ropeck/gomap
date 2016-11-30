@@ -13,7 +13,11 @@
 
         var data = new google.visualization.arrayToDataTable(JSON.parse(jsonData));
 
-        var options = {
+      var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var t = new Date();
+      t.setTime(date);
+      var options = {
+          title: days[t.getDay()],
           hAxis: { textPosition: 'none' },
           vAxis: { viewWindow: { max: 60, min: 0} },
           axes: {
@@ -32,12 +36,17 @@
         var div = document.createElement('div');
         div.id = date;
         var plotarea = document.getElementById('plotarea');
-        plotarea.append(div)
+        plotarea.append(div);
+        plotarea.append(document.createElement('br'));
         drawChart(date);
       };
 
       function drawmany() {
-        var date = new Date().getTime();
+        var today = new Date();
+        var day = today.getDay() || 7;
+        if ( day !== 1) today.setHours(-24 * (day - 1))
+        var date = today.getTime();
+        
         for (i=0; i<7; i++) {
           drawpage(date);
           date += 86400000;
