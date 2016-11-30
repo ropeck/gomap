@@ -48,29 +48,8 @@ Authentication successful.
 08:33 AM Completed update of app: commuteinfo-148920, version: v1
 </pre>
 
-## Stuff For Routes
-<pre>
-  ../map/collector.py:@app.route('/collectdata')
-  ../map/main.py:@app.route('/')
-  ../map/main.py:@app.route('/sample')
-  ../map/timeplot.py:@app.route('/drawday/<date>')
-  ../map/timeplot.py:@app.route('/plotdatarev')
-  ../map/timeplot.py:@app.route('/plotdatarev/<date>')
-  ../map/timeplot.py:@app.route('/plotdata')
-  ../map/timeplot.py:@app.route('/plotdata/<date>')
-  ../map/timeplot.py:@app.route('/pmplot')
-  ../map/timeplot.py:@app.route('/plot')
-  ../map/timeplot.py:@app.route('/travel')
-  ../map/timeplot.py:@app.route('/traveldata')
-  ../map/timeplot.py:@app.route('/traveldata/<date>')
-  ../map/timeplot.py:@app.route('/arrive')
-  ../map/timeplot.py:@app.route('/arrivedata')
-  ../map/timeplot.py:@app.route('/arrivedata/<date>')
-  ../map/timeplot.py:@app.route('/settings', methods=['GET', 'POST'])
-  ../map/timeplot.py:@app.route('/layout')
-  ../map/timeplot.py:@app.route('/map')
-  ../map/timeplot.py:@app.route('/')
-  ../map/timeplot.py:@app.route('/whentogo')
-</pre>
+## Stuff TODO
 
+* cleanup text display in the output for times and distances
+* timezone
 
