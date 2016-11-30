@@ -22,7 +22,8 @@ func drawday(td time.Time, r *http.Request) [24][4]int {
 func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][4]int {
 	data := [24][4]int{}
 
-	yy, mm, dd := td.In(time.Local).Date()
+	l, _ := time.LoadLocation("US/Pacific")
+	yy, mm, dd := td.In(l).Date()
 	t := time.Date(yy, mm, dd, 0, 0, 0, 0, td.Location())
 
 	t = td
@@ -178,7 +179,8 @@ func whentogo(w http.ResponseWriter, r *http.Request) {
 	wh.DurationInTraffic = d.DurationInTraffic.String()
 	wh.Text = ""
 	wh.Apikey = d.Apikey
-	td := time.Now().Truncate(10 * time.Minute)
+	l, _ := time.LoadLocation("US/Pacific")
+	td := time.Now().In(l).Truncate(10 * time.Minute)
 	for h := 0; h < 24; h++ {
 		d.Directions(&td)
 		td = td.Add(time.Minute * 10)

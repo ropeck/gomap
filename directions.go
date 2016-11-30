@@ -84,7 +84,8 @@ func NewStep(v *maps.Step) *Step {
 }
 
 func (d *Directions) DirectionsNow() {
-	t := time.Now()
+	l, _ := time.LoadLocation("US/Pacific")
+	t := time.Now().In(l)
 	d.Directions(&t)
 }
 
@@ -118,7 +119,8 @@ func (d *Directions) Directions(td *time.Time) {
 		// look at next week for hints on past
 		tdd = tdd.Add(time.Hour * 24 * 7)
 	}
-	dtime := strconv.FormatInt(tdd.Unix(), 10)
+	l, _ := time.LoadLocation("US/Pacific")
+	dtime := strconv.FormatInt(tdd.In(l).Unix(), 10)
 	log.Infof(ctx, "tdd %s %v", dtime, tdd)
 	r := &maps.DirectionsRequest{
 		Mode:          maps.TravelModeDriving,
