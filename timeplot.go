@@ -24,9 +24,8 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 
 	l, _ := time.LoadLocation("US/Pacific")
 	yy, mm, dd := td.In(l).Date()
-	t := time.Date(yy, mm, dd, 0, 0, 0, 0, td.Location())
+	t := time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 
-	t = td
 
 	ch := make(chan [4]int, 24)
 	for i := 0; i < 24; i++ {
@@ -125,7 +124,8 @@ func dailydata(w http.ResponseWriter, r *http.Request) {
 
 	st := time.Unix(i/1000, 0)
 	yy, mm, dd := st.In(time.Local).Date()
-	st = time.Date(yy, mm, dd, 0, 0, 0, 0, st.Location())
+	l, _ := time.LoadLocation("US/Pacific")
+	st = time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 	for _, v := range drawday(st, r) {
 		data = append(data, [2]interface{}{to_hms(st), v[3] - v[2]})
 		st = st.Add(time.Hour)

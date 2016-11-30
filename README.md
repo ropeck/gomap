@@ -51,5 +51,7 @@ Authentication successful.
 ## Stuff TODO
 
 * cleanup text display in the output for times and distances
-* timezone
+* [x] timezone
+* h:m axis label in weekly graph
+ 
 
