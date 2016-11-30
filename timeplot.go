@@ -52,13 +52,13 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 
 func drawdaylines(td time.Time, r *http.Request) []interface{} {
 	ctx := appengine.NewContext(r)
-	midnight := td.Truncate(time.Hour * 24)
 	daylist := []string{"Time"}
 	data := make(map[time.Weekday]([24][4]int))
-	td = midnight
+	td = previous_monday(td)
 	for i := 0; i < 7; i++ {
 		day := td.Weekday()
-		data[day] = drawday(td, r) // this is where to pick out the data
+		log.Infof(ctx, fmt.Sprintf("draw %s %s", td, day))
+		data[day] = drawday(td, r)
 		daylist = append(daylist, day.String())
 		td = td.Add(time.Hour * 24)
 	}
@@ -67,19 +67,13 @@ func drawdaylines(td time.Time, r *http.Request) []interface{} {
 
 	for h := 0; h < 24; h++ {
 		var row [8]int
-
 		for w := 0; w < 7; w++ {
-
-			//			log.Infof(ctx, fmt.Sprintf("drawdaylines %v", h))
 			d := data[time.Weekday(w)][h]
 			row[w+1] = d[3] - d[2]
-			//			log.Infof(ctx, fmt.Sprintf(" %v", data[time.Weekday(w)]))
 		}
 		row[0] = h
 		ret = append(ret, row)
 	}
-	log.Infof(ctx, fmt.Sprintf("travel %v", ret))
-
 	return ret
 }
 
@@ -117,7 +111,7 @@ func to_hms(t time.Time) string {
 func previous_monday(t time.Time) time.Time {
 	l, _ := time.LoadLocation("US/Pacific")
 	wd := int(t.Weekday())
-	yy, mm, dd := t.Add(time.Hour * 24 * time.Duration(wd)).Date()
+	yy, mm, dd := t.Add(time.Hour * -24 * time.Duration(wd)).Date()
 	st := time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 	return st
 }
