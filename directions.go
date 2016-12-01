@@ -22,6 +22,7 @@ type Config struct {
 
 type Directions struct {
 	Origin            string
+	Destination       string
 	Client            *maps.Client
 	Apikey            string
 	r                 *http.Request
@@ -89,6 +90,13 @@ func (d *Directions) DirectionsNow() {
 	d.Directions(&t)
 }
 
+func (d *Directions) DirectionsReverse(td *time.Time) {
+	save := d.Origin
+	d.Destination = d.Origin
+	d.Origin = save
+	d.Directions(td)
+}
+
 func (d *Directions) Directions(td *time.Time) {
 	// really not sure where the cookie/session stuff fits best.
 	// put it here for now
@@ -97,6 +105,10 @@ func (d *Directions) Directions(td *time.Time) {
 
 	origin = "1200 Crittenden Lane, Mountain View"
 	destination = "90 Enterprise Way, Scotts Valley"
+	if d.Origin != "" {
+		origin = d.Origin
+		destination = d.Destination
+	}
 	cookie, err := d.r.Cookie("origin")
 	if err == nil && cookie.Value != "" {
 		origin = cookie.Value
@@ -110,7 +122,9 @@ func (d *Directions) Directions(td *time.Time) {
 	}
 	cookie = &http.Cookie{Name: "destination", Value: destination}
 	d.Dcookie = cookie
-
+	d.Destination = destination
+	d.Origin = origin
+	
 	ctx := appengine.NewContext(d.r)
 
 	// cache by intervals for better hit rate

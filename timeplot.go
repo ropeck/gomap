@@ -26,14 +26,19 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 	yy, mm, dd := td.In(l).Date()
 	t := time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 
+	d := NewDirections(r)
 	ch := make(chan [4]int, 24)
 	for i := 0; i < 24; i++ {
 		go func(i int, t time.Time, ch chan [4]int) {
-			d := NewDirections(r)
 			d.Directions(&t)
+			traf :=	int(d.DurationInTraffic.Seconds())/60
+			d.DirectionsReverse(&t)
+			revtraf := int(d.DurationInTraffic.Seconds())/60
+			if revtraf > traf { traf = revtraf }
+			
 			a := [4]int{i * 60, i * 60,
 				int(d.Duration.Seconds())/60 + i*60,
-				int(d.DurationInTraffic.Seconds())/60 + i*60}
+				traf + i*60}
 			ch <- a
 		}(i, t, ch)
 		t = t.Add(time.Hour)
