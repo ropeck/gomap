@@ -13,7 +13,9 @@
 
         var data = new google.visualization.arrayToDataTable(JSON.parse(jsonData));
 
-        var options = {
+      var options = {
+          chartArea: { width: "100%", height: "100%" },
+          legend: {maxLines: 8},
         };
 
         var chart = new google.charts.Line(document.getElementById(date));
@@ -37,6 +39,6 @@
 </script>
 {{ end }}
 {{ define "content" }}
-    <div class="im" id="plotarea" style="width: 500px"></div>
+    <div class="im" id="plotarea" style="width: 450px;"></div>
 {{ end }}
     
