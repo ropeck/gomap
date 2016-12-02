@@ -78,3 +78,18 @@ func TestNewStepRed(t *testing.T) {
 		t.Errorf("expected %+v, was %+v", correctResponse, actualResponse)
 	}
 }
+
+func TestDirections(t *testing.T) {
+	inst, _ := aetest.NewInstance(nil)
+	r, _ := inst.NewRequest("GET", "/", nil)
+	d := NewDirections(r)
+	d.DirectionsNow()
+	// assert some things about the directions
+	// the content will change because of the API results
+	// also, the origin / destination cookies are missing
+
+	if &d.Distance == nil {
+		t.Fatalf("Failed to set Distance")
+	}
+
+}

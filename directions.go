@@ -133,7 +133,7 @@ func (d *Directions) Directions(td *time.Time) {
 	}
 	l, _ := time.LoadLocation("US/Pacific")
 	dtime := strconv.FormatInt(tdd.In(l).Unix(), 10)
-	log.Infof(ctx, "tdd %s %v", dtime, tdd)
+	//	log.Infof(ctx, "tdd %s %v", dtime, tdd)
 	r := &maps.DirectionsRequest{
 		Mode:          maps.TravelModeDriving,
 		Origin:        origin,
@@ -148,6 +148,7 @@ func (d *Directions) Directions(td *time.Time) {
 	if _, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
 		log.Infof(ctx, "item not in the cache")
 
+		// this is where to mock out the Directions API call with something testable
 		resp, _, err := d.Client.Directions(appengine.NewContext(d.r),
 			r)
 		if err != nil {
