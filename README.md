@@ -20,6 +20,12 @@ To deploy an appengine package, use this
 appcfg.py -A mapappgo -V v1 update ./
 <pre>
 
+## Testing
+App engine SDK runs unit tests in the *_test.go files like this:
+<pre>
+goapp test
+</pre>
+
 ## Stuff TODO
 
 * cleanup text display in the output for times and distances
