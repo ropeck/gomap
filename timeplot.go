@@ -68,13 +68,14 @@ func drawdaylines(td time.Time, r *http.Request) []interface{} {
 	ret = append(ret, daylist)
 
 	for h := 0; h < 24; h++ {
-		var row [8]int
+		var row [8]interface{}
 		for w := 0; w < 7; w++ {
 			d := data[time.Weekday(w)][h]
 			row[w+1] = d[3] - d[2]
 		}
-		row[0] = h
+		row[0] = fmt.Sprintf("%d:00", h)
 		ret = append(ret, row)
+		log.Infof(ctx, fmt.Sprintf("  %v", row))
 	}
 	return ret
 }
