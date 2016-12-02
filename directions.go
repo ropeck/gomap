@@ -22,6 +22,7 @@ type Config struct {
 
 type Directions struct {
 	Origin            string
+	Destination       string
 	Client            *maps.Client
 	Apikey            string
 	r                 *http.Request
@@ -89,14 +90,23 @@ func (d *Directions) DirectionsNow() {
 	d.Directions(&t)
 }
 
+func (d *Directions) ReverseEndpoints() {
+	save := d.Origin
+	d.Destination = d.Origin
+	d.Origin = save
+}
+
 func (d *Directions) Directions(td *time.Time) {
 	// really not sure where the cookie/session stuff fits best.
 	// put it here for now
 	// two cookies for the start and dest total.
 	var origin, destination string
 
-	origin = "1200 Crittenden Lane, Mountain View"
-	destination = "90 Enterprise Way, Scotts Valley"
+	if d.Origin == "" {
+		origin = "1200 Crittenden Lane, Mountain View"
+		destination = "90 Enterprise Way, Scotts Valley"
+	}
+
 	cookie, err := d.r.Cookie("origin")
 	if err == nil && cookie.Value != "" {
 		origin = cookie.Value
@@ -128,6 +138,7 @@ func (d *Directions) Directions(td *time.Time) {
 		Destination:   destination,
 		DepartureTime: dtime,
 	}
+
 	mkey := tdd.String() + ":" + origin + destination
 	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)
 	log.Infof(ctx, "memcache: "+mkey+" "+td.String())

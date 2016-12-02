@@ -14,10 +14,12 @@
         var data = new google.visualization.arrayToDataTable(JSON.parse(jsonData));
 
       var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var colorList = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477"];
       var t = new Date();
       t.setTime(date);
       var options = {
-          title: days[t.getDay()],
+      title: days[t.getDay()],
+      colors: [colorList[t.getDay()]],
           hAxis: { textPosition: 'none' },
           vAxis: { viewWindow: { max: 60, min: 0} },
           axes: {

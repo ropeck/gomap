@@ -115,9 +115,11 @@ func previous_monday(t time.Time) time.Time {
 	st := time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 	return st
 }
+
 func dailydata(w http.ResponseWriter, r *http.Request) {
 	var data []interface{}
-	data = append(data, []string{"Time", "Delay"})
+
+	data = append(data, []interface{}{"Time", "Delay"})
 
 	tdarg := vestigo.Param(r, "date")
 	i, _ := strconv.ParseInt(tdarg, 10, 64)
