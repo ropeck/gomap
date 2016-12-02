@@ -92,12 +92,6 @@ func (d *Directions) DirectionsNow() {
 	d.Directions(&t)
 }
 
-func (d *Directions) ReverseEndpoints() {
-	save := d.Origin
-	d.Destination = d.Origin
-	d.Origin = save
-}
-
 func (d *Directions) Directions(td *time.Time) {
 	ctx := appengine.NewContext(d.r)
 

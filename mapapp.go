@@ -205,13 +205,7 @@ func whentogo(w http.ResponseWriter, r *http.Request) {
 			to_hms(td), to_hms(ar),
 			int(d.DurationInTraffic.Seconds()/60), delay)
 	}
-	//    tz = td.replace(tzinfo=pytz.timezone("UTC")).astimezone(pytz.timezone("US/Pacific"))
-	//      print tz.strftime("%H:%M"),(tz+timedelta(minutes=gmaps.duration_in_traffic/60)).strftime("%H:%M"), gmaps.duration_in_traffic_text, gmaps.diffstr
 
-	//      # 44 miles normally 0:52
-	//      # now   17:00 1:12 (+19)
-	//      # 16:50 17:09 1:12 (+19)
-	//      # ...
 	t, _ := template.ParseFiles("template/base.html",
 		"template/whentogo.html")
 	t.ExecuteTemplate(w, "layout", wh)
