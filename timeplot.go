@@ -20,27 +20,29 @@ func drawday(td time.Time, r *http.Request) [24][4]int {
 }
 
 func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][4]int {
+	ctx := appengine.NewContext(r)
 	data := [24][4]int{}
 
 	l, _ := time.LoadLocation("US/Pacific")
 	yy, mm, dd := td.In(l).Date()
 	t := time.Date(yy, mm, dd, 0, 0, 0, 0, l)
 
-	ch := make(chan [4]int, 24)
+	batch := 1
+	ch := make(chan [4]int, batch)
 	for i := 0; i < 24; i++ {
 		go func(i int, t time.Time, ch chan [4]int) {
 			d := NewDirections(r)
 			d.Directions(&t)
+			traf :=	int(d.DurationInTraffic.Seconds())/60
 			a := [4]int{i * 60, i * 60,
 				int(d.Duration.Seconds())/60 + i*60,
-				int(d.DurationInTraffic.Seconds())/60 + i*60}
+				traf + i*60}
 			ch <- a
 		}(i, t, ch)
 		t = t.Add(time.Hour)
 	}
 
 	// read back all 24 hours and assign them to the slots
-	ctx := appengine.NewContext(r)
 	for i := 0; i < 24; i++ {
 		d := <-ch
 		h := d[0] / 60
@@ -66,13 +68,14 @@ func drawdaylines(td time.Time, r *http.Request) []interface{} {
 	ret = append(ret, daylist)
 
 	for h := 0; h < 24; h++ {
-		var row [8]int
+		var row [8]interface{}
 		for w := 0; w < 7; w++ {
 			d := data[time.Weekday(w)][h]
 			row[w+1] = d[3] - d[2]
 		}
-		row[0] = h
+		row[0] = fmt.Sprintf("%d:00", h)
 		ret = append(ret, row)
+		log.Infof(ctx, fmt.Sprintf("  %v", row))
 	}
 	return ret
 }
