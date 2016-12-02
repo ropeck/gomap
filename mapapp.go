@@ -33,7 +33,7 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 		go func(i int, t time.Time, ch chan [4]int) {
 			d := NewDirections(r)
 			d.Directions(&t)
-			traf :=	int(d.DurationInTraffic.Seconds())/60
+			traf := int(d.DurationInTraffic.Seconds()) / 60
 			a := [4]int{i * 60, i * 60,
 				int(d.Duration.Seconds())/60 + i*60,
 				traf + i*60}
@@ -90,19 +90,22 @@ func LocalNewDirections(w http.ResponseWriter, r *http.Request) *Directions {
 
 func hello(w http.ResponseWriter, r *http.Request) {
 	d := LocalNewDirections(w, r)
-	t, _ := template.ParseFiles("base.html", "index.html")
+	t, _ := template.ParseFiles("template/base.html",
+		"template/index.html")
 	t.ExecuteTemplate(w, "layout", d)
 }
 
 func arrive(w http.ResponseWriter, r *http.Request) {
 	d := LocalNewDirections(w, r)
-	t, _ := template.ParseFiles("base.html", "arrive.html")
+	t, _ := template.ParseFiles("template/base.html",
+		"template/arrive.html")
 	t.ExecuteTemplate(w, "layout", d)
 }
 
 func daily(w http.ResponseWriter, r *http.Request) {
 	d := LocalNewDirections(w, r)
-	t, _ := template.ParseFiles("base.html", "daily.html")
+	t, _ := template.ParseFiles("template/base.html",
+		"template/daily.html")
 	t.ExecuteTemplate(w, "layout", d)
 }
 
@@ -140,13 +143,19 @@ func dailydata(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func travel(w http.ResponseWriter, r *http.Request) {
+func weekly(w http.ResponseWriter, r *http.Request) {
 	d := LocalNewDirections(w, r)
-	t, _ := template.ParseFiles("base.html", "travel.html")
+	t, err := template.ParseFiles("template/base.html",
+		"template/weekly.html")
+	if err != nil {
+		ctx := appengine.NewContext(r)
+		log.Infof(ctx, err.Error())
+		return
+	}
 	t.ExecuteTemplate(w, "layout", d)
 }
 
-func traveldata(w http.ResponseWriter, r *http.Request) {
+func weeklydata(w http.ResponseWriter, r *http.Request) {
 	tdarg := vestigo.Param(r, "date")
 	i, _ := strconv.ParseInt(tdarg, 10, 64)
 	data := drawdaylines(time.Unix(i/1000, 0), r)
@@ -203,7 +212,8 @@ func whentogo(w http.ResponseWriter, r *http.Request) {
 	//      # now   17:00 1:12 (+19)
 	//      # 16:50 17:09 1:12 (+19)
 	//      # ...
-	t, _ := template.ParseFiles("base.html", "whentogo.html")
+	t, _ := template.ParseFiles("template/base.html",
+		"template/whentogo.html")
 	t.ExecuteTemplate(w, "layout", wh)
 }
 
@@ -214,8 +224,8 @@ func init() {
 	r.Get("/daily", daily)
 	r.Get("/arrivedata/:date", arrivedata)
 	r.Get("/arrive", arrive)
-	r.Get("/traveldata/:date", traveldata)
-	r.Get("/travel", travel)
+	r.Get("/weeklydata/:date", weeklydata)
+	r.Get("/weekly", weekly)
 	r.Get("/", hello)
 	http.Handle("/", r)
 }

@@ -6,7 +6,7 @@
       function drawChart(date) {
 
         var jsonData = $.ajax({
-            url: "/traveldata/" + date,
+            url: "/weeklydata/" + date,
             dataType: "json",
             async: false
             }).responseText;
