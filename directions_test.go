@@ -99,6 +99,12 @@ func TestDirections(t *testing.T) {
 	if &d.Distance == nil {
 		t.Fatalf("Failed to set Distance")
 	}
+	if d.Origin != "1200 Crittenden Lane, Mountain View" {
+		t.Fatalf("Failed to set Origin")
+	}
+	if d.Destination != "90 Enterprise Way, Scotts Valley" {
+		t.Fatalf("Failed to set Destination")
+	}
 	b, _ := json.Marshal(d)
 	fmt.Printf(string(b))
 
