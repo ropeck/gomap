@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"html/template"
 	"os"
 	"reflect"
@@ -34,12 +36,18 @@ func TestGetApiKey(t *testing.T) {
 	}
 	//	c1 := appengine.NewContext(r)
 
+	savekey := os.Getenv("APIKEY")
 	os.Setenv("APIKEY", "testing")
 	d := NewDirections(r)
 
 	if d.Apikey == "" {
 		t.Errorf("APIKEY is missing")
 	}
+	os.Unsetenv("APIKEY")
+	if savekey != "" {
+		os.Setenv("APIKEY", savekey)
+	}
+
 }
 
 func TestNewStep(t *testing.T) {
@@ -91,5 +99,7 @@ func TestDirections(t *testing.T) {
 	if &d.Distance == nil {
 		t.Fatalf("Failed to set Distance")
 	}
+	b, _ := json.Marshal(d)
+	fmt.Printf(string(b))
 
 }
