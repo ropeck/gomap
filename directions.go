@@ -92,9 +92,19 @@ func (d *Directions) DirectionsNow() {
 	d.Directions(&t)
 }
 
+func (d *Directions) LookupDirections(r *maps.DirectionsRequest) []maps.Route {
+	ctx := appengine.NewContext(d.r)
+	resp, _, err := d.Client.Directions(appengine.NewContext(d.r),
+		r)
+	if err != nil {
+		log.Infof(ctx, err.Error())
+		return nil
+	}
+	return resp
+}
+
 func (d *Directions) Directions(td *time.Time) {
 	ctx := appengine.NewContext(d.r)
-
 	// really not sure where the cookie/session stuff fits best.
 	// put it here for now
 	// two cookies for the start and dest total.
@@ -149,18 +159,11 @@ func (d *Directions) Directions(td *time.Time) {
 		log.Infof(ctx, "item not in the cache")
 
 		// this is where to mock out the Directions API call with something testable
-		resp, _, err := d.Client.Directions(appengine.NewContext(d.r),
-			r)
-		if err != nil {
-			log.Infof(ctx, mkey)
-			log.Infof(ctx, err.Error())
-			return
-		}
+		resp := d.LookupDirections(r)
 		d.Dir = &resp[0]
-		r.Origin = destination
+		r.Origin = destination // reverse direction lookup
 		r.Destination = origin
-		resp, _, err = d.Client.Directions(appengine.NewContext(d.r),
-			r)
+		resp = d.LookupDirections(r)
 		d.Leg = d.Dir.Legs[0]
 		rev := resp[0].Legs[0]
 		log.Infof(ctx, "rev %v", rev)
