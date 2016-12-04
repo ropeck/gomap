@@ -115,7 +115,7 @@ func hash_key(key string) string {
 
 func testdata_save(key string, d []maps.Route) {
 	if os.Getenv("TESTDATA_MODE") == "SAVE" {
-		b, _ := json.Marshal(d)
+		b, _ := json.MarshalIndent(d, "", "\t")
 		err := ioutil.WriteFile("testdata/"+hash_key(key), b, 0644)
 		if err != nil {
 			panic(err)
