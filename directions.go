@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"crypto/md5"
 	"html/template"
 	"net/http"
+	"io/ioutil"
+	"encoding/json"
 	"os"
 	"strconv"
 	"time"
@@ -103,6 +107,22 @@ func (d *Directions) LookupDirections(r *maps.DirectionsRequest) []maps.Route {
 	return resp
 }
 
+
+func hash_key(key string) string {
+	data := []byte(key)
+	return fmt.Sprintf("%x", md5.Sum(data))
+}
+
+func testdata_save(key string, d []maps.Route) {
+	if os.Getenv("TESTDATA_MODE") == "SAVE" {
+		b, _ := json.Marshal(d)
+		err := ioutil.WriteFile("testdata/"+hash_key(key), b, 0644)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+		
 func (d *Directions) Directions(td *time.Time) {
 	ctx := appengine.NewContext(d.r)
 	// really not sure where the cookie/session stuff fits best.
@@ -152,35 +172,40 @@ func (d *Directions) Directions(td *time.Time) {
 	}
 
 	mkey := tdd.String() + ":" + origin + destination
-	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)
-	log.Infof(ctx, "memcache: "+mkey+" "+td.String())
+//	r.DepartureTime = strconv.FormatInt(tdd.Unix(), 10)
 
-	if _, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
-		log.Infof(ctx, "item not in the cache")
+// for testing, check memcache data locally, and save results to local file
 
-		// this is where to mock out the Directions API call with something testable
-		resp := d.LookupDirections(r)
-		d.Dir = &resp[0]
-		r.Origin = destination // reverse direction lookup
-		r.Destination = origin
-		resp = d.LookupDirections(r)
-		d.Leg = d.Dir.Legs[0]
-		rev := resp[0].Legs[0]
-		log.Infof(ctx, "rev %v", rev)
-		if rev.DurationInTraffic > d.Leg.DurationInTraffic {
+//	testdata_read(mkey, &d.Dir)
+//	if &d.Dir == nil {
+		if _, err := memcache.JSON.Get(ctx, mkey, &d.Dir); err == memcache.ErrCacheMiss {
+			log.Infof(ctx, "item not in the cache: %s", mkey)
+
+			resp := d.LookupDirections(r)
 			d.Dir = &resp[0]
-		}
+			d.Leg = d.Dir.Legs[0]
+			r.Origin = destination // reverse direction lookup
+			r.Destination = origin
+			resp = d.LookupDirections(r)
+			rev := resp[0].Legs[0]
+			log.Infof(ctx, "rev %v", rev)
+			if rev.DurationInTraffic > d.Leg.DurationInTraffic {
+				d.Dir = &resp[0]
+			}
 
-		err = memcache.JSON.Set(ctx,
-			&memcache.Item{Key: mkey, Object: d.Dir})
-		log.Infof(ctx, "cache update")
-		if err != nil {
-			log.Infof(ctx, err.Error())
+			// save results to testdata localfile too
+			testdata_save(mkey, resp)
+			err = memcache.JSON.Set(ctx,
+				&memcache.Item{Key: mkey, Object: d.Dir})
+			log.Infof(ctx, "cache update")
+			if err != nil {
+				log.Infof(ctx, err.Error())
+			}
+		} else if err != nil {
+			log.Errorf(ctx, "error getting item: %v", err)
 		}
-	} else if err != nil {
-		log.Errorf(ctx, "error getting item: %v", err)
-	}
-
+//	}
+	log.Infof(ctx, "&v", d.Dir)
 	for _, v := range d.Dir.Legs[0].Steps {
 		d.Steps = append(d.Steps, NewStep(v))
 	}
