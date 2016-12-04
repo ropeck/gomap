@@ -2,9 +2,9 @@
   A simple project to use the Google maps API and show traffic commute times.
   Translated from the same project written in Python.
 
-# (TODO)
-## parts to convert
-These items still need to be converted from the python version of mapapp.
+# TODO
+   * bring notes from doc TODO over here for README notes
+
 
 # Overview
 
