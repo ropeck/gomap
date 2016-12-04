@@ -141,6 +141,7 @@ func dailydata(w http.ResponseWriter, r *http.Request) {
 	}
 	b, _ := json.Marshal(data)
 	w.Write(b)
+
 }
 
 func weekly(w http.ResponseWriter, r *http.Request) {

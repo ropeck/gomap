@@ -183,15 +183,16 @@ func (d *Directions) Directions(td *time.Time) {
 
 			resp := d.LookupDirections(r)
 			d.Dir = &resp[0]
-			d.Leg = d.Dir.Legs[0]
+			forw := d.Dir.Legs[0]
 			r.Origin = destination // reverse direction lookup
 			r.Destination = origin
 			resp = d.LookupDirections(r)
 			rev := resp[0].Legs[0]
 			log.Infof(ctx, "rev %v", rev)
-			if rev.DurationInTraffic > d.Leg.DurationInTraffic {
+			if rev.DurationInTraffic > forw.DurationInTraffic {
 				d.Dir = &resp[0]
 			}
+			d.Leg = d.Dir.Legs[0]
 
 			// save results to testdata localfile too
 			testdata_save(mkey, resp)
