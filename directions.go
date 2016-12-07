@@ -96,24 +96,32 @@ func (d *Directions) DirectionsNow() {
 	d.Directions(&t)
 }
 
-func (d *Directions) LookupDirections(tdd time.Time, origin string, destination string) []maps.Route {
+func (d *Directions) LookupDirections(tdd time.Time,
+	origin string, destination string) []maps.Route {
 	l, _ := time.LoadLocation("US/Pacific")
 	dtime := strconv.FormatInt(tdd.In(l).Unix(), 10)
-	//	log.Infof(ctx, "tdd %s %v", dtime, tdd)
-	r := &maps.DirectionsRequest{
-		Mode:          maps.TravelModeDriving,
-		Origin:        origin,
-		Destination:   destination,
-		DepartureTime: dtime,
-	}
 	ctx := appengine.NewContext(d.r)
-	resp, _, err := d.Client.Directions(appengine.NewContext(d.r),
-		r)
-	if err != nil {
-		log.Infof(ctx, err.Error())
-		return nil
+
+	// check testdata canned API case. nil unless testing mode
+	resp := testdata_read(tdd, origin, destination)
+	if resp == nil {
+		r := &maps.DirectionsRequest{
+			Mode:          maps.TravelModeDriving,
+			Origin:        origin,
+			Destination:   destination,
+			DepartureTime: dtime,
+		}
+		resp, _, err := d.Client.Directions(ctx, r)
+		if err != nil {
+			log.Infof(ctx, err.Error())
+			return nil
+		}
+		log.Infof(ctx, "new data %v", resp)
+		//		testdata_save(resp, tdd, origin, destination)
+	} else {
+		log.Infof(ctx, "data read %v", resp)
 	}
-	testdata_save(resp, tdd, origin, destination)
+	log.Infof(ctx, "%v", resp)
 	return resp
 }
 
@@ -139,6 +147,23 @@ func testdata_save(d []maps.Route, tdd time.Time, origin, destination string) {
 			panic(err)
 		}
 	}
+}
+
+func testdata_read(tdd time.Time, origin, destination string) []maps.Route {
+	var resp []maps.Route = nil
+	if os.Getenv("TESTDATA_MODE") == "READ" {
+		key := mkey(tdd, origin, destination)
+		_, err := os.Stat(key)
+		if os.IsNotExist(err) {
+			return resp
+		}
+		data, err := ioutil.ReadFile("testdata/" + timestamp(tdd) + ":" + hash_key(key))
+		if err != nil {
+			panic(err)
+		}
+		json.Unmarshal(data, &resp)
+	}
+	return resp
 }
 
 func (d *Directions) Directions(td *time.Time) {
