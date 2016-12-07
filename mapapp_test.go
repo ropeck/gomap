@@ -18,7 +18,7 @@ func TestDrawday(t *testing.T) {
 	td, _ := time.Parse("20060102150405", "20161206130000")
 	data := drawday(td, r)
 	// [24][4]int
-	if data[0] != [4]int{0, 0, 0, 0} {
+	if data[0] != [4]int{0, 0, 40, 39} {
 		t.Fatalf("data mismatched. got %v", data[0])
 	}
 }

@@ -111,17 +111,18 @@ func (d *Directions) LookupDirections(tdd time.Time,
 			Destination:   destination,
 			DepartureTime: dtime,
 		}
-		resp, _, err := d.Client.Directions(ctx, r)
+		dir, _, err := d.Client.Directions(ctx, r)
+		resp = dir
 		if err != nil {
 			log.Infof(ctx, err.Error())
 			return nil
 		}
 		log.Infof(ctx, "new data %v", resp)
-		//		testdata_save(resp, tdd, origin, destination)
+		testdata_save(resp, tdd, origin, destination)
 	} else {
 		log.Infof(ctx, "data read %v", resp)
 	}
-	log.Infof(ctx, "%v", resp)
+	log.Infof(ctx, "Lookup %v", resp)
 	return resp
 }
 
