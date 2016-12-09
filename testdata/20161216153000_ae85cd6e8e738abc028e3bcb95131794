@@ -25,8 +25,8 @@
 						"transit_details": null,
 						"travel_mode": "DRIVING",
 						"duration": {
-							"value": 13,
-							"text": "13s"
+							"value": 14,
+							"text": "14s"
 						}
 					},
 					{
@@ -75,8 +75,8 @@
 						"transit_details": null,
 						"travel_mode": "DRIVING",
 						"duration": {
-							"value": 1070,
-							"text": "17m50s"
+							"value": 1073,
+							"text": "17m53s"
 						}
 					},
 					{
@@ -200,8 +200,8 @@
 						"transit_details": null,
 						"travel_mode": "DRIVING",
 						"duration": {
-							"value": 34,
-							"text": "34s"
+							"value": 35,
+							"text": "35s"
 						}
 					}
 				],
@@ -220,12 +220,12 @@
 				"start_address": "90 Enterprise Way, Scotts Valley, CA 95066, USA",
 				"end_address": "Google Bldg CL2, 1200 Crittenden Ln, Mountain View, CA 94043, USA",
 				"duration": {
-					"value": 2285,
-					"text": "38m5s"
+					"value": 2290,
+					"text": "38m10s"
 				},
 				"duration_in_traffic": {
-					"value": 2348,
-					"text": "39m8s"
+					"value": 2351,
+					"text": "39m11s"
 				},
 				"arrival_time": null,
 				"departure_time": null

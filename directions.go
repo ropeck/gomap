@@ -143,7 +143,7 @@ func testdata_save(d []maps.Route, tdd time.Time, origin, destination string) {
 	if os.Getenv("TESTDATA_MODE") == "SAVE" {
 		b, _ := json.MarshalIndent(d, "", "\t")
 		key := mkey(tdd, origin, destination)
-		err := ioutil.WriteFile("testdata/"+timestamp(tdd)+":"+hash_key(key), b, 0644)
+		err := ioutil.WriteFile("testdata/"+timestamp(tdd)+"_"+hash_key(key), b, 0644)
 		if err != nil {
 			panic(err)
 		}
@@ -201,6 +201,9 @@ func (d *Directions) Directions(td *time.Time) {
 
 	// cache by intervals for better hit rate
 	tdd := td.Truncate(30 * time.Minute)
+
+	// for testing, all the time is in the past and should be used as is
+	// maybe don't skip to next week if there's a cache hit?
 	if tdd.Unix() < time.Now().Unix() {
 		// look at next week for hints on past
 		tdd = tdd.Add(time.Hour * 24 * 7)
