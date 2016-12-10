@@ -8,12 +8,6 @@
 
 # Overview
 
-## Dependencies
-  This module uses the directions module which does the actual API calls.
-It's in github.com/ropeck/directions and included in the appengine app.
-
-## Deployment
-
 To deploy an appengine package, use this
 
 <pre>
