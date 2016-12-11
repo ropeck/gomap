@@ -52,12 +52,13 @@ func drawday_base(td time.Time, r *http.Request, reverse bool, cache bool) [24][
 	return data
 }
 
-func drawdaylines(td time.Time, r *http.Request) []interface{} {
+func drawdaylines(td time.Time, days string, r *http.Request) []interface{} {
 	ctx := appengine.NewContext(r)
 	daylist := []string{"Time"}
 	data := make(map[time.Weekday]([24][4]int))
 	td = previous_monday(td)
-	for i := 0; i < 7; i++ {
+	max_days, _ := strconv.Atoi(days)
+	for i := 0; i < max_days; i++ {
 		day := td.Weekday()
 		log.Infof(ctx, fmt.Sprintf("draw %s %s", td, day))
 		data[day] = drawday(td, r)
@@ -68,8 +69,8 @@ func drawdaylines(td time.Time, r *http.Request) []interface{} {
 	ret = append(ret, daylist)
 
 	for h := 0; h < 24; h++ {
-		var row [8]interface{}
-		for w := 0; w < 7; w++ {
+		row := make([]interface{},max_days+1)
+		for w := 0; w < max_days; w++ {
 			d := data[time.Weekday(w)][h]
 			row[w+1] = d[3] - d[2]
 		}
@@ -158,8 +159,9 @@ func weekly(w http.ResponseWriter, r *http.Request) {
 
 func weeklydata(w http.ResponseWriter, r *http.Request) {
 	tdarg := vestigo.Param(r, "date")
+	days := vestigo.Param(r, "days")
 	i, _ := strconv.ParseInt(tdarg, 10, 64)
-	data := drawdaylines(time.Unix(i/1000, 0), r)
+	data := drawdaylines(time.Unix(i/1000, 0), days, r)
 	b, _ := json.Marshal(data)
 	w.Write(b)
 }
@@ -219,7 +221,7 @@ func init() {
 	r.Get("/daily", daily)
 	r.Get("/arrivedata/:date", arrivedata)
 	r.Get("/arrive", arrive)
-	r.Get("/weeklydata/:date", weeklydata)
+	r.Get("/weeklydata/:date/:days", weeklydata)
 	r.Get("/weekly", weekly)
 	r.Get("/", hello)
 	http.Handle("/", r)

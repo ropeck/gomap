@@ -22,3 +22,7 @@ func TestDrawday(t *testing.T) {
 		t.Fatalf("data mismatched. got %v", data[0])
 	}
 }
+
+// TODO write test for weeklydata
+// TODO Write test for drawdaylines
+// TODO add drawdaylines with variable number of days
