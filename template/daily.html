@@ -34,13 +34,16 @@
 
         chart.draw(data, google.charts.Bar.convertOptions(options));
       };
-      function drawpage(date) {
+      function drawpage(date, n) {
         var div = document.createElement('div');
         div.id = date;
         var plotarea = document.getElementById('plotarea');
         plotarea.append(div);
         plotarea.append(document.createElement('br'));
-        drawChart(date);
+        setTimeout(function() {
+          drawChart(date);
+          if (n > 0) { drawpage(date+86400000, n-1) };
+        },0);
       };
 
       function drawmany() {
@@ -49,10 +52,7 @@
         if ( day !== 1) today.setHours(-24 * (day - 1))
         var date = today.getTime();
         
-        for (i=0; i<7; i++) {
-          drawpage(date);
-          date += 86400000;
-        }
+        drawpage(date, 6);
       };
 
     </script>
