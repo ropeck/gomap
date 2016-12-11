@@ -4,12 +4,6 @@
       google.charts.setOnLoadCallback(drawmany);
 
       function graphdata(date,days) {
-        var jdata = $.ajax({
-            url: "/weeklydata/" + date + "/" + days,
-            dataType: "json",
-            async: false
-            }).responseText;
-        return new google.visualization.arrayToDataTable(JSON.parse(jdata));
       }
 
       function drawChart(chart, date, days) {
@@ -18,9 +12,18 @@
           legend: {maxLines: 8},
         };
 
-        chart.draw(graphdata(date, days), options);
-        if (days < 7) {
- 	  setInterval(function(){drawChart(chart, date, days+1)}, 10);
+      if (days < 8) {
+ 		 // setInterval(function(){drawChart(chart, date, d+1)}, 10);
+		 // maybe loop updating the data and draw the
+		 // chart every 100 ms until it's done?
+		var jdata = $.ajax({
+		 url: "/weeklydata/" + date + "/" + days,
+		 dataType: "json",
+		 async: false
+		}).responseText;
+		var d = new google.visualization.arrayToDataTable(JSON.parse(jdata));
+	        chart.draw(d, options);
+		setTimeout(function() {drawChart(chart, date, days+1)}, 0);
         };
       };
 
